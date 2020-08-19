@@ -16,8 +16,11 @@ namespace WindowsFormsApp2
 {
     public partial class Form1 : Form
     {
-        static string[] Scopes = { SheetsService.Scope.SpreadsheetsReadonly };
-        static string ApplicationName = "Google Sheets API .NET Quickstart";
+        static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
+        static readonly string ApplicationName = "Sacha";
+        static readonly string SpreadsheetId = "1RGGGdqUb-O137YLCGbrMvEBb7MslNqEiAWn4yE5R6bE";
+        static readonly string sheet = "Class Data";
+        static SheetsService service;
 
         public Form1()
         {
@@ -41,45 +44,27 @@ namespace WindowsFormsApp2
 
         private void button1_Click(object sender, EventArgs e)
         {
-            UserCredential credential;
-
-            using (var stream =
-                new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
+            GoogleCredential credential;
+            using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
             {
-                // The file token.json stores the user's access and refresh tokens, and is created
-                // automatically when the authorization flow completes for the first time.
-                string credPath = "token.json";
-                credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(stream).Secrets,
-                    Scopes,
-                    "user",
-                    CancellationToken.None,
-                    new FileDataStore(credPath, true)).Result;
-                Console.WriteLine("Credential file saved to: " + credPath);
+                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
             }
 
-            // Create Google Sheets API service.
-            var service = new SheetsService(new BaseClientService.Initializer()
+            service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
                 ApplicationName = ApplicationName,
             });
 
-            // Define request parameters.
-            String spreadsheetId = "1RGGGdqUb-O137YLCGbrMvEBb7MslNqEiAWn4yE5R6bE";
             String range = "Class Data!A:F";
             SpreadsheetsResource.ValuesResource.GetRequest request =
-                    service.Spreadsheets.Values.Get(spreadsheetId, range);
+                    service.Spreadsheets.Values.Get(SpreadsheetId, range);
 
-            // Prints the names and majors of students in a sample spreadsheet:
-            // https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
             ValueRange response = request.Execute();
             IList<IList<Object>> values = response.Values;
-            if (values != null && values.Count > 0)
+            if (true)
             {
                 Console.WriteLine("Name, Major");
-                var raws = values.Count() + 1;
-                Console.WriteLine(raws);
                 string name = textBox1.Text;
                 string gender = textBox2.Text;
                 string cval = textBox3.Text;
@@ -92,19 +77,20 @@ namespace WindowsFormsApp2
 
                 var objectList = new List<object>() { name, gender, cval, state, spec, club };
                 valueRange.Values = new List<IList<object>> { objectList };
-                var appendRequest = service.Spreadsheets.Values.Append(valueRange, spreadsheetId, range1);
+                var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
                 appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
                 var appendResponse = appendRequest.Execute();
-
-                //var valueRange = new ValueRange { Values = new List<IList<object>> { new List<object> { name } } };
-                //SpreadsheetsResource.ValuesResource.UpdateRequest request1 = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, range1);
-                //Google.Apis.Sheets.v4.Data.UpdateValuesResponse response1 = request1.Execute();
 
             }
             else
             {
                 Console.WriteLine("No data found.");
             }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
