@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
-using Google.Apis.Services;
-using Google.Apis.Util.Store;
 using System.IO;
-using System.Threading;
-using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace WindowsFormsApp2
 {
@@ -62,33 +56,45 @@ namespace WindowsFormsApp2
 
             ValueRange response = request.Execute();
             IList<IList<Object>> values = response.Values;
-            if (true)
+            string name = textBox1.Text;
+            string category = textBox2.Text;
+            string start = textBox3.Text;
+            string end = textBox4.Text;
+
+            var valueRange = new ValueRange();
+            logic g = new logic();
+            List<string> dates = new List<string>();
+            g.CreateDates(start, end, ref dates);
+            char ch = 'A';
+            int x = (int)ch + dates.Count;
+            ch = (char)x;
+            var range1 = "Class Data!A:" + ch;
+
+            var objectList2 = new List<object>();
+            objectList2.Add("название");
+            objectList2.Add("кол-во категорий");
+            foreach (var i in dates)
             {
-                Console.WriteLine("Name, Major");
-                string name = textBox1.Text;
-                string gender = textBox2.Text;
-                string cval = textBox3.Text;
-                string state = textBox4.Text;
-                string spec = textBox5.Text;
-                string club = textBox6.Text;
-                var range1 = "Class Data!A:F";
-
-                var valueRange = new ValueRange();
-
-                var objectList = new List<object>() { name, gender, cval, state, spec, club };
-                valueRange.Values = new List<IList<object>> { objectList };
-                var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
-                appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
-                var appendResponse = appendRequest.Execute();
-
+                objectList2.Add(i);
             }
-            else
-            {
-                Console.WriteLine("No data found.");
-            }
+            valueRange.Values = new List<IList<object>> { objectList2 };
+            var appendRequest2 = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
+            appendRequest2.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+            var appendResponse2 = appendRequest2.Execute();
+
+            var objectList = new List<object>() { name, category };
+            valueRange.Values = new List<IList<object>> { objectList };
+            var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
+            appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+            var appendResponse = appendRequest.Execute();
         }
 
         private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
         {
 
         }
