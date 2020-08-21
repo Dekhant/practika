@@ -95,3 +95,13 @@ C:\Users\sasha\Documents\GitHub\practika\WindowsFormsApp2\bin\Debug\Iesi.Collect
 C:\Users\sasha\Documents\GitHub\practika\WindowsFormsApp2\bin\Debug\NHibernate.xml
 C:\Users\sasha\Documents\GitHub\practika\WindowsFormsApp2\bin\Debug\Remotion.Linq.xml
 C:\Users\sasha\Documents\GitHub\practika\WindowsFormsApp2\bin\Debug\Remotion.Linq.EagerFetching.xml
+F:\pro\practika\WindowsFormsApp2\bin\Debug\Antlr3.Runtime.dll
+F:\pro\practika\WindowsFormsApp2\bin\Debug\Iesi.Collections.dll
+F:\pro\practika\WindowsFormsApp2\bin\Debug\NHibernate.dll
+F:\pro\practika\WindowsFormsApp2\bin\Debug\Remotion.Linq.dll
+F:\pro\practika\WindowsFormsApp2\bin\Debug\Remotion.Linq.EagerFetching.dll
+F:\pro\practika\WindowsFormsApp2\bin\Debug\Antlr3.Runtime.xml
+F:\pro\practika\WindowsFormsApp2\bin\Debug\Iesi.Collections.xml
+F:\pro\practika\WindowsFormsApp2\bin\Debug\NHibernate.xml
+F:\pro\practika\WindowsFormsApp2\bin\Debug\Remotion.Linq.xml
+F:\pro\practika\WindowsFormsApp2\bin\Debug\Remotion.Linq.EagerFetching.xml

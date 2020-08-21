@@ -48,5 +48,34 @@ namespace WindowsFormsApp2
                 dayStart = 1;
             }
         }
+
+        public void initializeDates(DateTime start, DateTime end, ref List<string> dates)
+        {
+            string formatted = start.ToString("dd-MM-yyyy");
+            DateTime mayDay;
+            while (start.ToString("dd-MM-yyyy") != end.ToString("dd-MM-yyyy"))
+            {
+                formatted = start.ToString("dd-MM-yyyy");
+                dates.Add(formatted);
+
+                mayDay = start.AddDays(1);
+                start = mayDay;
+            }
+            formatted = start.ToString("dd-MM-yyyy");
+            dates.Add(formatted);
+        }
+
+        public int tableMarkup(string numOfCategories, string[] numOfCategory, string[] roomCapacity)
+        {
+            int numOfSeats = 0;
+            var category = new List<int>();
+            for (var i = 0; i < numOfCategory.Length; i++)
+            {
+                category.Add(int.Parse(numOfCategory[i]));
+                numOfSeats += category[i] * int.Parse(roomCapacity[i]);
+            }
+
+            return numOfSeats;
+        }
     }
 }

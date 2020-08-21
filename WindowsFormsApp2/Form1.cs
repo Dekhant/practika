@@ -23,7 +23,7 @@ namespace WindowsFormsApp2
 
         private void label1_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         private void label4_Click(object sender, EventArgs e)
@@ -56,23 +56,29 @@ namespace WindowsFormsApp2
 
             ValueRange response = request.Execute();
             IList<IList<Object>> values = response.Values;
-            string name = textBox1.Text;
-            string category = textBox2.Text;
-            string start = textBox3.Text;
-            string end = textBox4.Text;
+            var start = dateTimePicker1.Value;
+            var end = dateTimePicker2.Value;
 
             var valueRange = new ValueRange();
             logic g = new logic();
             List<string> dates = new List<string>();
-            g.CreateDates(start, end, ref dates);
+            g.initializeDates(start, end, ref dates);
             char ch = 'A';
             int x = (int)ch + dates.Count;
             ch = (char)x;
             var range1 = "Class Data!A:" + ch;
 
             var objectList2 = new List<object>();
-            objectList2.Add("название");
-            objectList2.Add("кол-во категорий");
+            objectList2.Add("Гостиница");
+            objectList2.Add("Группа");
+            objectList2.Add("Погоняло");
+            objectList2.Add("Номер");
+            objectList2.Add("Заезд");
+            objectList2.Add("Выезд");
+
+            string numOfCategories = textBox2.Text;
+            var numOfCategory = textBox3.Text.Split(' ');
+            var roomCapacity = textBox4.Text.Split(' ');
             foreach (var i in dates)
             {
                 objectList2.Add(i);
@@ -82,11 +88,17 @@ namespace WindowsFormsApp2
             appendRequest2.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
             var appendResponse2 = appendRequest2.Execute();
 
-            var objectList = new List<object>() { name, category };
-            valueRange.Values = new List<IList<object>> { objectList };
-            var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
-            appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
-            var appendResponse = appendRequest.Execute();
+            range1 = "Class Data!A2:A" + g.tableMarkup(numOfCategories, numOfCategory, roomCapacity);
+
+            var objectList = new List<object>();
+            objectList.Add(textBox1.Text);
+            for (int i = 0; i < g.tableMarkup(numOfCategories, numOfCategory, roomCapacity); i++)
+            {
+                valueRange.Values = new List<IList<object>> { objectList };
+                var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
+                appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+                var appendResponse = appendRequest.Execute();
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
