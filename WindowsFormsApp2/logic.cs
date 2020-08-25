@@ -65,6 +65,7 @@ namespace WindowsFormsApp2
             dates.Add(formatted);
         }
 
+
         public int tableMarkup(string numOfCategories, string[] numOfCategory, string[] roomCapacity)
         {
             int numOfSeats = 0;
