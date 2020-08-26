@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Newtonsoft.Json;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using System.IO;
@@ -16,9 +18,25 @@ namespace WindowsFormsApp2
         static readonly string sheet = "Class Data";
         static SheetsService service;
         int clickCounter = 1;
+
         public Form1()
         {
             InitializeComponent();
+            GoogleCredential credential;
+            using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
+            {
+                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+            }
+
+            service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName,
+            });
+
+            Google.Apis.Sheets.v4.Data.ClearValuesRequest requestBody = new Google.Apis.Sheets.v4.Data.ClearValuesRequest();
+            SpreadsheetsResource.ValuesResource.ClearRequest request = service.Spreadsheets.Values.Clear(requestBody, SpreadsheetId, "Class Data!A1:Z100");
+            Google.Apis.Sheets.v4.Data.ClearValuesResponse response = request.Execute();
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -37,78 +55,80 @@ namespace WindowsFormsApp2
         }
 
         private void button1_Click(object sender, EventArgs e)
-        {
-            GoogleCredential credential;
-            using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
-            {
-                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
-            }
+        { }
 
-            service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = ApplicationName,
-            });
+        //private void button1_Click(object sender, EventArgs e)
+        //{
+        //    GoogleCredential credential;
+        //    using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
+        //    {
+        //        credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+        //    }
 
-            var start = dateTimePicker1.Value;
-            var end = dateTimePicker2.Value;
+        //    service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
+        //    {
+        //        HttpClientInitializer = credential,
+        //        ApplicationName = ApplicationName,
+        //    });
 
-            var valueRange = new ValueRange();
-            logic g = new logic();
-            List<string> dates = new List<string>();
-            g.initializeDates(start, end, ref dates);
-            char ch = 'G';
-            int x = (int)ch + dates.Count;
-            ch = (char)x;
-            var range1 = "Class Data!A:" + ch;
+        //    var start = dateTimePicker1.Value;
+        //    var end = dateTimePicker2.Value;
 
-            var objectList2 = new List<object>();
-            objectList2.Add("Гостиница");
-            objectList2.Add("Кол-во чел.");
-            objectList2.Add("ФИО");
-            objectList2.Add("Номер");
-            objectList2.Add("Заезд");
-            objectList2.Add("Выезд");
+        //    var valueRange = new ValueRange();
+        //    logic g = new logic();
+        //    List<string> dates = new List<string>();
+        //    g.initializeDates(start, end, ref dates);
+        //    char ch = 'G';
+        //    int x = (int)ch + dates.Count;
+        //    ch = (char)x;
+        //    var range1 = "Class Data!A:" + ch;
 
-            string numOfCategories = textBox2.Text;
-            string numOfRooms = textBox5.Text;
-            foreach (var i in dates)
-            {
-                objectList2.Add(i);
-            }
-            valueRange.Values = new List<IList<object>> { objectList2 };
-            var appendRequest2 = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
-            appendRequest2.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
-            var appendResponse2 = appendRequest2.Execute();
+        //    var objectList2 = new List<object>();
+        //    objectList2.Add("Гостиница");
+        //    objectList2.Add("Кол-во чел.");
+        //    objectList2.Add("ФИО");
+        //    objectList2.Add("Номер");
+        //    objectList2.Add("Заезд");
+        //    objectList2.Add("Выезд");
 
-            range1 = "Class Data!A2:A" + numOfRooms;
+        //    string numOfCategories = textBox2.Text;
+        //    foreach (var i in dates)
+        //    {
+        //        objectList2.Add(i);
+        //    }
+        //    valueRange.Values = new List<IList<object>> { objectList2 };
+        //    var appendRequest2 = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
+        //    appendRequest2.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+        //    var appendResponse2 = appendRequest2.Execute();
 
-            var objectList = new List<object>();
-            objectList.Add(textBox1.Text);
-            valueRange.Values = new List<IList<object>> { objectList };
-            var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
-            appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
-            for (int i = 0; i < int.Parse(numOfRooms); i++)
-            {
-                var appendResponse = appendRequest.Execute();
-            }
+        //    range1 = "Class Data!A2:A" + numOfRooms;
 
-            var range3 = "Class Data!D" + (int.Parse(numOfRooms) + 3) + ":" + ch;
-            var objectList3 = new List<object>();
-            objectList3.Add("Блок в отеле");
-            g.updateRequest(range3, objectList3);           
-            clickCounter = clickCounter + 3 + int.Parse(numOfRooms); 
+        //    var objectList = new List<object>();
+        //    objectList.Add(textBox1.Text);
+        //    valueRange.Values = new List<IList<object>> { objectList };
+        //    var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
+        //    appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+        //    for (int i = 0; i < int.Parse(numOfRooms); i++)
+        //    {
+        //        var appendResponse = appendRequest.Execute();
+        //    }
 
-            var range4 = "Class Data!D" + (int.Parse(numOfRooms) + 5 + int.Parse(textBox2.Text)) + ":" + ch;
-            var objectList4 = new List<object>();
-            objectList4.Add("Фактический блок");
-            g.updateRequest(range4, objectList4);
+        //    var range3 = "Class Data!D" + (int.Parse(numOfRooms) + 3) + ":" + ch;
+        //    var objectList3 = new List<object>();
+        //    objectList3.Add("Блок в отеле");
+        //    g.updateRequest(range3, objectList3);           
+        //    clickCounter = clickCounter + 3 + int.Parse(numOfRooms); 
 
-            var range5 = "Class Data!D" + (int.Parse(numOfRooms) + 7 + int.Parse(textBox2.Text) * 2) + ":" + ch;
-            var objectList5 = new List<object>();
-            objectList5.Add("Разница");
-            g.updateRequest(range5, objectList5);
-        }
+        //    var range4 = "Class Data!D" + (int.Parse(numOfRooms) + 5 + int.Parse(textBox2.Text)) + ":" + ch;
+        //    var objectList4 = new List<object>();
+        //    objectList4.Add("Фактический блок");
+        //    g.updateRequest(range4, objectList4);
+
+        //    var range5 = "Class Data!D" + (int.Parse(numOfRooms) + 7 + int.Parse(textBox2.Text) * 2) + ":" + ch;
+        //    var objectList5 = new List<object>();
+        //    objectList5.Add("Разница");
+        //    g.updateRequest(range5, objectList5);
+        //}
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -129,8 +149,6 @@ namespace WindowsFormsApp2
         {
 
         }
-
-        
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -204,6 +222,65 @@ namespace WindowsFormsApp2
                 }
 
             clickCounter++;
+        }
+
+        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            var categoryName = textBox8.Text;
+            var seatsNum = textBox7.Text;
+            var roomsNum = textBox5.Text;
+            var checkError1 = false;
+            var checkError2 = false;
+
+            int res;
+
+            switch
+            if (!int.TryParse(seatsNum, out res) || !int.TryParse(roomsNum, out res))
+            {
+                label9.Text = "Введите корректные данные";
+                checkError1 = true;
+            }
+            else
+            {
+                checkError1 = false;
+            }
+
+            if (categoryName == "" || seatsNum == "" || roomsNum == "")
+            {
+                label9.Text = "Ошибка: Заполните поля";
+                checkError2 = true;
+            }
+            else
+            {
+                label9.Text = "";
+                checkError2 = false;
+            }
+
+            if (!checkError1 && !checkError2)
+            {
+                int n = dataGridView1.Rows.Add();
+                dataGridView1.Rows[n].Cells[0].Value = categoryName;
+                dataGridView1.Rows[n].Cells[1].Value = seatsNum;
+                dataGridView1.Rows[n].Cells[2].Value = roomsNum;
+            }
+        }
+
+        private void textBox8_TextChanged(object sender, EventArgs e)
+        { }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
