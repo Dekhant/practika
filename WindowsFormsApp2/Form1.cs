@@ -50,12 +50,6 @@ namespace WindowsFormsApp2
                 ApplicationName = ApplicationName,
             });
 
-            String range = "Class Data!A:F";
-            SpreadsheetsResource.ValuesResource.GetRequest request =
-                    service.Spreadsheets.Values.Get(SpreadsheetId, range);
-
-            ValueRange response = request.Execute();
-            IList<IList<Object>> values = response.Values;
             var start = dateTimePicker1.Value;
             var end = dateTimePicker2.Value;
 
@@ -70,8 +64,8 @@ namespace WindowsFormsApp2
 
             var objectList2 = new List<object>();
             objectList2.Add("Гостиница");
-            objectList2.Add("Группа");
-            objectList2.Add("Погоняло");
+            objectList2.Add("Кол-во чел.");
+            objectList2.Add("ФИО");
             objectList2.Add("Номер");
             objectList2.Add("Заезд");
             objectList2.Add("Выезд");
@@ -102,11 +96,18 @@ namespace WindowsFormsApp2
             var range3 = "Class Data!D" + (int.Parse(numOfRooms) + 3) + ":" + ch;
             var objectList3 = new List<object>();
             objectList3.Add("Блок в отеле");
-            valueRange.Values = new List<IList<object>> { objectList3 };
-            var appendRequest3 = service.Spreadsheets.Values.Update(valueRange, SpreadsheetId, range3);
-            appendRequest3.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-            var appendResponse3 = appendRequest3.Execute();
+            g.updateRequest(range3, objectList3);           
             clickCounter = clickCounter + 3 + int.Parse(numOfRooms); 
+
+            var range4 = "Class Data!D" + (int.Parse(numOfRooms) + 5 + int.Parse(textBox2.Text)) + ":" + ch;
+            var objectList4 = new List<object>();
+            objectList4.Add("Фактический блок");
+            g.updateRequest(range4, objectList4);
+
+            var range5 = "Class Data!D" + (int.Parse(numOfRooms) + 7 + int.Parse(textBox2.Text) * 2) + ":" + ch;
+            var objectList5 = new List<object>();
+            objectList5.Add("Разница");
+            g.updateRequest(range5, objectList5);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -129,8 +130,15 @@ namespace WindowsFormsApp2
 
         }
 
+        
+
         private void button2_Click(object sender, EventArgs e)
         {
+            int numOfCategories = int.Parse(textBox2.Text);
+            if(clickCounter == numOfCategories)
+            {
+                throw new Exception();
+            }
             GoogleCredential credential;
             using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
             {
@@ -143,12 +151,13 @@ namespace WindowsFormsApp2
                 ApplicationName = ApplicationName,
             });
 
+            logic updater = new logic();
             string categoryName = textBox6.Text;
             string roomCapacity = textBox4.Text;
             string numOfRooms = textBox3.Text;
             var objectList = new List<object>();
-            objectList.Add(textBox6.Text);
-            objectList.Add(textBox4.Text);
+            objectList.Add(categoryName);
+            objectList.Add(roomCapacity);
             objectList.Add("");
             var start = dateTimePicker1.Value;
             var end = dateTimePicker2.Value;
@@ -158,14 +167,42 @@ namespace WindowsFormsApp2
             ch = (char)x;
             for (int i = 0; i <= dates.Days + 1; i++)
             {
-                objectList.Add(roomCapacity);
+                objectList.Add(numOfRooms);
             }
             string range = "Class Data!D" + clickCounter + ":" + ch + clickCounter;
-            var valueRange = new ValueRange();
-            valueRange.Values = new List<IList<object>> { objectList };
-            var updateRequest = service.Spreadsheets.Values.Update(valueRange, SpreadsheetId, range);
-            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
-            var updateResponse = updateRequest.Execute();
+            updater.updateRequest(range, objectList);
+
+            var objectList2 = new List<object>();
+            objectList2.Add(categoryName);
+            objectList2.Add(roomCapacity);
+            objectList2.Add("");
+            string range2 = "Class Data!D" + (clickCounter + numOfCategories + 2) + ":" + ch + (clickCounter + numOfCategories + 2);
+            for (int i = 0; i <= dates.Days + 1; i++)
+            {
+                objectList2.Add("0");
+            }
+            updater.updateRequest(range2, objectList2);
+
+            string range3 = "Class Data!D" + (clickCounter + numOfCategories * 2 + 4) + ":E" + (clickCounter + numOfCategories * 2 + 4);
+            var objectList3 = new List<object>();
+            objectList3.Add(categoryName);
+            objectList3.Add(roomCapacity);
+            updater.updateRequest(range3, objectList3);
+
+            for (int j = 0; j <= dates.Days + 1; j++)
+            {
+                char column = 'G';
+                x = (int)column + j;
+                column = (char)x;
+                var cell = "Class Data!" + column + (clickCounter + numOfCategories + 7) + ":" + column;
+
+                string result = "=" + column + clickCounter + " - " + column + (clickCounter + numOfCategories + 2);
+
+                var objectList4 = new List<object>();
+                objectList4.Add(result);
+                updater.updateRequest(cell, objectList4);
+                }
+
             clickCounter++;
         }
     }

@@ -1,54 +1,20 @@
-﻿using System;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Sheets.v4;
+using Google.Apis.Sheets.v4.Data;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace WindowsFormsApp2
 {
     public class logic
     {
-        public void CreateDates(string start, string end, ref List<string> dates)
-        {
-            int i;
-            IDictionary<int, int> dict = new Dictionary<int, int>() {
-                { 1, 31 },
-                { 2, 28 },
-                { 3, 31 },
-                { 4, 30 },
-                { 5, 31 },
-                { 6, 30 },
-                { 7, 31 },
-                { 8, 31 },
-                { 9, 30 },
-                { 10, 31 },
-                { 11, 30 },
-                { 12, 31 },
-            };
-            var dateInMonths = new ReadOnlyDictionary<int, int>(dict);
-
-            int dayStart = int.Parse(start.Split('.')[0]);
-            int monthStart = int.Parse(start.Split('.')[1]);
-
-            int dayEnd = int.Parse(end.Split('.')[0]);
-            int monthEnd = int.Parse(end.Split('.')[1]);
-
-            while(dayStart != dayEnd || monthStart != monthEnd)
-            {
-                dateInMonths.TryGetValue(monthStart, out i);
-                while(dayStart != i && dayStart != dayEnd)
-                {
-                    dates.Add(dayStart.ToString() + "." + monthStart.ToString());
-                    dayStart++;
-                }
-                dates.Add(dayStart.ToString() + "." + monthStart.ToString());
-                if (monthStart == monthEnd)
-                {
-                    break;
-                }
-                monthStart++;
-                dayStart = 1;
-            }
-        }
-
+        static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
+        static readonly string ApplicationName = "Sacha";
+        static readonly string SpreadsheetId = "1RGGGdqUb-O137YLCGbrMvEBb7MslNqEiAWn4yE5R6bE";
+        static readonly string sheet = "Class Data";
+        static SheetsService service;
         public void initializeDates(DateTime start, DateTime end, ref List<string> dates)
         {
             string formatted = start.ToString("dd-MM-yyyy");
@@ -77,6 +43,28 @@ namespace WindowsFormsApp2
             }
 
             return numOfSeats;
+        }
+
+        public void updateRequest(string range, List<object> objectList)
+        {
+            GoogleCredential credential;
+            using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
+            {
+                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+            }
+
+            service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName,
+            });
+
+            ValueRange valueRange = new ValueRange();
+            valueRange.Values = new List<IList<object>> { objectList };
+
+            var updateRequest = service.Spreadsheets.Values.Update(valueRange, SpreadsheetId, range);
+            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+            var updateResponse = updateRequest.Execute();
         }
     }
 }
