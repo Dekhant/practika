@@ -18,6 +18,7 @@ namespace WindowsFormsApp2
         static readonly string sheet = "Class Data";
         static SheetsService service;
         int clickCounter = 1;
+        int allRooms = 0;
 
         public Form1()
         {
@@ -37,6 +38,10 @@ namespace WindowsFormsApp2
             Google.Apis.Sheets.v4.Data.ClearValuesRequest requestBody = new Google.Apis.Sheets.v4.Data.ClearValuesRequest();
             SpreadsheetsResource.ValuesResource.ClearRequest request = service.Spreadsheets.Values.Clear(requestBody, SpreadsheetId, "Class Data!A1:Z100");
             Google.Apis.Sheets.v4.Data.ClearValuesResponse response = request.Execute();
+
+            Google.Apis.Sheets.v4.Data.ClearValuesRequest requestBody2 = new Google.Apis.Sheets.v4.Data.ClearValuesRequest();
+            SpreadsheetsResource.ValuesResource.ClearRequest request2 = service.Spreadsheets.Values.Clear(requestBody, SpreadsheetId, "Table!A1:Z100");
+            Google.Apis.Sheets.v4.Data.ClearValuesResponse response2 = request2.Execute();
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -55,80 +60,71 @@ namespace WindowsFormsApp2
         }
 
         private void button1_Click(object sender, EventArgs e)
-        { }
+        {
+            GoogleCredential credential;
+            using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
+            {
+                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+            }
 
-        //private void button1_Click(object sender, EventArgs e)
-        //{
-        //    GoogleCredential credential;
-        //    using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
-        //    {
-        //        credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
-        //    }
+            service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName,
+            });
 
-        //    service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
-        //    {
-        //        HttpClientInitializer = credential,
-        //        ApplicationName = ApplicationName,
-        //    });
+            var start = dateTimePicker1.Value;
+            var end = dateTimePicker2.Value;
 
-        //    var start = dateTimePicker1.Value;
-        //    var end = dateTimePicker2.Value;
+            var valueRange = new ValueRange();
+            logic g = new logic();
+            List<string> dates = new List<string>();
+            g.initializeDates(start, end, ref dates);
+            char ch = 'G';
+            int x = (int)ch + dates.Count;
+            ch = (char)x;
+            var range1 = "Class Data!A:" + ch;
 
-        //    var valueRange = new ValueRange();
-        //    logic g = new logic();
-        //    List<string> dates = new List<string>();
-        //    g.initializeDates(start, end, ref dates);
-        //    char ch = 'G';
-        //    int x = (int)ch + dates.Count;
-        //    ch = (char)x;
-        //    var range1 = "Class Data!A:" + ch;
+            var objectList2 = new List<object>();
+            objectList2.Add("Гостиница");
+            objectList2.Add("Кол-во чел.");
+            objectList2.Add("ФИО");
+            objectList2.Add("Номер");
+            objectList2.Add("Заезд");
+            objectList2.Add("Выезд");
 
-        //    var objectList2 = new List<object>();
-        //    objectList2.Add("Гостиница");
-        //    objectList2.Add("Кол-во чел.");
-        //    objectList2.Add("ФИО");
-        //    objectList2.Add("Номер");
-        //    objectList2.Add("Заезд");
-        //    objectList2.Add("Выезд");
+            string numOfCategories = textBox2.Text;
+            foreach (var i in dates)
+            {
+                objectList2.Add(i);
+            }
+            valueRange.Values = new List<IList<object>> { objectList2 };
+            var appendRequest2 = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
+            appendRequest2.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+            var appendResponse2 = appendRequest2.Execute();
 
-        //    string numOfCategories = textBox2.Text;
-        //    foreach (var i in dates)
-        //    {
-        //        objectList2.Add(i);
-        //    }
-        //    valueRange.Values = new List<IList<object>> { objectList2 };
-        //    var appendRequest2 = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
-        //    appendRequest2.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
-        //    var appendResponse2 = appendRequest2.Execute();
+            var range3 = "Table!D1" + ":" + ch;
+            var objectList3 = new List<object>();
+            objectList3.Add("Блок в отеле");
+            objectList3.Add("");
+            objectList3.Add("");
+            foreach (var i in dates)
+            {
+                objectList3.Add(i);
+            }
+            g.updateRequest(range3, objectList3);
 
-        //    range1 = "Class Data!A2:A" + numOfRooms;
+            var range4 = "Table!D" + (3 + int.Parse(numOfCategories)) + ":" + ch;
+            var objectList4 = new List<object>();
+            objectList4.Add("Фактический блок");
+            g.updateRequest(range4, objectList4);
 
-        //    var objectList = new List<object>();
-        //    objectList.Add(textBox1.Text);
-        //    valueRange.Values = new List<IList<object>> { objectList };
-        //    var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
-        //    appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
-        //    for (int i = 0; i < int.Parse(numOfRooms); i++)
-        //    {
-        //        var appendResponse = appendRequest.Execute();
-        //    }
+            var range5 = "Table!D" + (5 + int.Parse(numOfCategories) * 2) + ":" + ch;
+            var objectList5 = new List<object>();
+            objectList5.Add("Разница");
+            g.updateRequest(range5, objectList5);
 
-        //    var range3 = "Class Data!D" + (int.Parse(numOfRooms) + 3) + ":" + ch;
-        //    var objectList3 = new List<object>();
-        //    objectList3.Add("Блок в отеле");
-        //    g.updateRequest(range3, objectList3);           
-        //    clickCounter = clickCounter + 3 + int.Parse(numOfRooms); 
-
-        //    var range4 = "Class Data!D" + (int.Parse(numOfRooms) + 5 + int.Parse(textBox2.Text)) + ":" + ch;
-        //    var objectList4 = new List<object>();
-        //    objectList4.Add("Фактический блок");
-        //    g.updateRequest(range4, objectList4);
-
-        //    var range5 = "Class Data!D" + (int.Parse(numOfRooms) + 7 + int.Parse(textBox2.Text) * 2) + ":" + ch;
-        //    var objectList5 = new List<object>();
-        //    objectList5.Add("Разница");
-        //    g.updateRequest(range5, objectList5);
-        //}
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -152,76 +148,86 @@ namespace WindowsFormsApp2
 
         private void button2_Click(object sender, EventArgs e)
         {
-            int numOfCategories = int.Parse(textBox2.Text);
-            if(clickCounter == numOfCategories)
-            {
-                throw new Exception();
-            }
-            GoogleCredential credential;
-            using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
-            {
-                credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
-            }
+            //int numOfCategories = int.Parse(textBox2.Text);
+            //if (clickCounter == numOfCategories)
+            //{
+            //    throw new Exception();
+            //}
+            //GoogleCredential credential;
+            //using (var stream = new FileStream("My First Project-2dfed0050064.json", FileMode.Open, FileAccess.Read))
+            //{
+            //    credential = GoogleCredential.FromStream(stream).CreateScoped(Scopes);
+            //}
 
-            service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = ApplicationName,
-            });
+            //service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
+            //{
+            //    HttpClientInitializer = credential,
+            //    ApplicationName = ApplicationName,
+            //});
 
-            logic updater = new logic();
-            string categoryName = textBox6.Text;
-            string roomCapacity = textBox4.Text;
-            string numOfRooms = textBox3.Text;
-            var objectList = new List<object>();
-            objectList.Add(categoryName);
-            objectList.Add(roomCapacity);
-            objectList.Add("");
-            var start = dateTimePicker1.Value;
-            var end = dateTimePicker2.Value;
-            var dates = end - start;
-            char ch = 'D';
-            int x = (int)ch + dates.Days + 4;
-            ch = (char)x;
-            for (int i = 0; i <= dates.Days + 1; i++)
-            {
-                objectList.Add(numOfRooms);
-            }
-            string range = "Class Data!D" + clickCounter + ":" + ch + clickCounter;
-            updater.updateRequest(range, objectList);
+            //logic updater = new logic();
+            //string categoryName = textBox6.Text;
+            //string roomCapacity = textBox4.Text;
+            //string numOfRooms = textBox3.Text;
+            //var objectList = new List<object>();
+            //objectList.Add(categoryName);
+            //objectList.Add(roomCapacity);
+            //objectList.Add("");
+            //var start = dateTimePicker1.Value;
+            //var end = dateTimePicker2.Value;
+            //var dates = end - start;
+            //char ch = 'D';
+            //int x = (int)ch + dates.Days + 4;
+            //ch = (char)x;
+            //for (int i = 0; i <= dates.Days + 1; i++)
+            //{
+            //    objectList.Add(numOfRooms);
+            //}
+            //string range = "Class Data!D" + clickCounter + ":" + ch + clickCounter;
+            //updater.updateRequest(range, objectList);
 
-            var objectList2 = new List<object>();
-            objectList2.Add(categoryName);
-            objectList2.Add(roomCapacity);
-            objectList2.Add("");
-            string range2 = "Class Data!D" + (clickCounter + numOfCategories + 2) + ":" + ch + (clickCounter + numOfCategories + 2);
-            for (int i = 0; i <= dates.Days + 1; i++)
-            {
-                objectList2.Add("0");
-            }
-            updater.updateRequest(range2, objectList2);
+            //var objectList2 = new List<object>();
+            //objectList2.Add(categoryName);
+            //objectList2.Add(roomCapacity);
+            //objectList2.Add("");
+            //string range2 = "Class Data!D" + (clickCounter + numOfCategories + 2) + ":" + ch + (clickCounter + numOfCategories + 2);
+            //for (int i = 0; i <= dates.Days + 1; i++)
+            //{
+            //    objectList2.Add("0");
+            //}
+            //updater.updateRequest(range2, objectList2);
 
-            string range3 = "Class Data!D" + (clickCounter + numOfCategories * 2 + 4) + ":E" + (clickCounter + numOfCategories * 2 + 4);
-            var objectList3 = new List<object>();
-            objectList3.Add(categoryName);
-            objectList3.Add(roomCapacity);
-            updater.updateRequest(range3, objectList3);
+            //string range3 = "Class Data!D" + (clickCounter + numOfCategories * 2 + 4) + ":E" + (clickCounter + numOfCategories * 2 + 4);
+            //var objectList3 = new List<object>();
+            //objectList3.Add(categoryName);
+            //objectList3.Add(roomCapacity);
+            //updater.updateRequest(range3, objectList3);
 
-            for (int j = 0; j <= dates.Days + 1; j++)
-            {
-                char column = 'G';
-                x = (int)column + j;
-                column = (char)x;
-                var cell = "Class Data!" + column + (clickCounter + numOfCategories + 7) + ":" + column;
+            //for (int j = 0; j <= dates.Days + 1; j++)
+            //{
+            //    char column = 'G';
+            //    x = (int)column + j;
+            //    column = (char)x;
+            //    var cell = "Class Data!" + column + (clickCounter + numOfCategories + 7) + ":" + column;
 
-                string result = "=" + column + clickCounter + " - " + column + (clickCounter + numOfCategories + 2);
+            //    string result = "=" + column + clickCounter + " - " + column + (clickCounter + numOfCategories + 2);
 
-                var objectList4 = new List<object>();
-                objectList4.Add(result);
-                updater.updateRequest(cell, objectList4);
-                }
+            //    var objectList4 = new List<object>();
+            //    objectList4.Add(result);
+            //    updater.updateRequest(cell, objectList4);
+            //}
+            //clickCounter++;
+            //range1 = "Class Data!A2:A" + numOfRooms;
 
-            clickCounter++;
+            //var objectList = new List<object>();
+            //objectList.Add(textBox1.Text);
+            //valueRange.Values = new List<IList<object>> { objectList };
+            //var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range1);
+            //appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+            //for (int i = 0; i < int.Parse(numOfRooms); i++)
+            //{
+            //    var appendResponse = appendRequest.Execute();
+            //}
         }
 
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
@@ -233,19 +239,19 @@ namespace WindowsFormsApp2
         {
 
         }
-
+        int addedCategoies = 1;
         private void button3_Click(object sender, EventArgs e)
         {
             var categoryName = textBox8.Text;
-            var seatsNum = textBox7.Text;
+            var roomCapacity = textBox7.Text;
             var roomsNum = textBox5.Text;
             var checkError1 = false;
             var checkError2 = false;
+            logic updater = new logic();
 
             int res;
 
-            switch
-            if (!int.TryParse(seatsNum, out res) || !int.TryParse(roomsNum, out res))
+            if (!int.TryParse(roomCapacity, out res) || !int.TryParse(roomsNum, out res))
             {
                 label9.Text = "Введите корректные данные";
                 checkError1 = true;
@@ -255,23 +261,96 @@ namespace WindowsFormsApp2
                 checkError1 = false;
             }
 
-            if (categoryName == "" || seatsNum == "" || roomsNum == "")
+            if (categoryName == "" || roomCapacity == "" || roomsNum == "")
             {
                 label9.Text = "Ошибка: Заполните поля";
                 checkError2 = true;
             }
             else
             {
-                label9.Text = "";
                 checkError2 = false;
+            }
+
+            if (addedCategoies == (int.Parse(textBox2.Text) + 1))
+            {
+                label9.Text = "Все категории уже добавлены";
+                checkError1 = true;
             }
 
             if (!checkError1 && !checkError2)
             {
+                label9.Text = "";
                 int n = dataGridView1.Rows.Add();
                 dataGridView1.Rows[n].Cells[0].Value = categoryName;
-                dataGridView1.Rows[n].Cells[1].Value = seatsNum;
+                dataGridView1.Rows[n].Cells[1].Value = roomCapacity;
                 dataGridView1.Rows[n].Cells[2].Value = roomsNum;
+                allRooms += int.Parse(roomsNum);
+                int numOfCategories = int.Parse(textBox2.Text);
+
+                var objectList = new List<object>();
+                objectList.Add(categoryName);
+                objectList.Add(roomCapacity);
+                objectList.Add("");
+                var start = dateTimePicker1.Value;
+                var end = dateTimePicker2.Value;
+                var dates = end - start;
+                char ch = 'D';
+                int x = (int)ch + dates.Days + 4;
+                ch = (char)x;
+                for (int i = 0; i <= dates.Days + 1; i++)
+                {
+                    objectList.Add(roomsNum);
+                }
+                string range = "Table!D" + (addedCategoies + 1)  + ":" + ch + (addedCategoies + 1);
+                updater.updateRequest(range, objectList);
+
+                var objectList2 = new List<object>();
+                objectList2.Add(categoryName);
+                objectList2.Add(roomCapacity);
+                objectList2.Add("");
+                string range2 = "Table!D" + (addedCategoies + numOfCategories + 3) + ":" + ch + (addedCategoies + numOfCategories + 3);
+                for (int i = 0; i <= dates.Days + 1; i++)
+                {
+                    objectList2.Add("0");
+                }
+                updater.updateRequest(range2, objectList2);
+
+                string range3 = "Table!D" + (addedCategoies + numOfCategories * 2 + 5) + ":E" + (addedCategoies + numOfCategories * 2 + 5);
+                var objectList3 = new List<object>();
+                objectList3.Add(categoryName);
+                objectList3.Add(roomCapacity);
+                updater.updateRequest(range3, objectList3);
+
+                for (int j = 0; j <= dates.Days + 1; j++)
+                {
+                    char column = 'G';
+                    x = (int)column + j;
+                    column = (char)x;
+                    var cell = "Table!" + column + (addedCategoies + numOfCategories * 2 + 5) + ":" + column;
+
+                    string result = "=" + column + (addedCategoies + 1) + " - " + column + (addedCategoies + numOfCategories + 3);
+
+                    var objectList4 = new List<object>();
+                    objectList4.Add(result);
+                    updater.updateRequest(cell, objectList4);
+                }
+
+                var range5 = "Class Data!A:D";
+                var objectList5 = new List<object>();
+                objectList5.Add(textBox1.Text);
+                objectList5.Add("");
+                objectList5.Add("");
+                objectList5.Add(categoryName);
+                ValueRange valueRange = new ValueRange();
+                valueRange.Values = new List<IList<object>> { objectList5 };
+                var appendRequest = service.Spreadsheets.Values.Append(valueRange, SpreadsheetId, range5);
+                appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+                for (int i = 0; i < int.Parse(roomsNum); i++)
+                {
+                    var appendResponse = appendRequest.Execute();
+                }
+
+                addedCategoies++;
             }
         }
 
